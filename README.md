@@ -4,7 +4,8 @@ Vitrine interativa de produtos tech feita com HTML, CSS e JavaScript puro.
 
 ## Preview
 
-Projeto publicado no GitHub: [portfolio-store](https://github.com/RuanRychard/portfolio-store)
+- Projeto online: [portfolio-store](https://ruanrychard.github.io/portfolio-store/)
+- Repositório: [RuanRychard/portfolio-store](https://github.com/RuanRychard/portfolio-store)
 
 ## Funcionalidades
 
@@ -23,6 +24,7 @@ Projeto publicado no GitHub: [portfolio-store](https://github.com/RuanRychard/po
 - HTML5
 - CSS3
 - JavaScript
+- GitHub Pages
 
 ## Observação
 
@@ -32,5 +34,4 @@ O login é uma simulação front-end para fins de estudo e portfólio. Ele não 
 
 - Refinar acessibilidade do modal
 - Adicionar página ou seção de detalhes dos produtos
-- Melhorar a experiência mobile
-- Publicar uma versão online com GitHub Pages
+- Melhorar a documentação com screenshot do projeto publicado

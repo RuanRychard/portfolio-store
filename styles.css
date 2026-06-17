@@ -801,45 +801,59 @@ input {
     }
 
     .site-header {
-        align-items: flex-start;
-        gap: 14px;
-        display: flex;
-        flex-direction: column;
+        width: calc(100% - 28px);
+        padding: 14px 0;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .site-nav {
+        grid-column: 1 / -1;
+        justify-self: stretch;
     }
 
     .site-nav ul {
-        gap: 20px;
-        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.055);
+    }
+
+    .site-nav a {
+        font-size: 0.84rem;
     }
 
     .auth-actions {
-        width: 100%;
-        justify-content: space-between;
+        justify-self: end;
     }
 
     .container {
-        min-height: 100svh;
+        min-height: 760px;
     }
 
     .product-list {
-        min-height: 100svh;
+        min-height: 760px;
     }
 
     .product-item {
         grid-template-columns: 1fr;
         align-content: center;
-        gap: 16px;
-        padding-top: 138px;
-        padding-bottom: 126px;
+        gap: 10px;
+        padding-top: 150px;
+        padding-bottom: 136px;
         text-align: center;
     }
 
     .product-img {
-        min-height: 260px;
+        min-height: 230px;
     }
 
     .product-img img {
-        max-height: 34vh;
+        max-height: 260px;
         margin: 0 auto;
     }
 
@@ -878,12 +892,38 @@ input {
 }
 
 @media (max-width: 460px) {
-    .site-header {
-        width: calc(100% - 28px);
+    .logo {
+        font-size: 1rem;
     }
 
-    .site-nav a {
-        font-size: 0.88rem;
+    .login-trigger,
+    .logout-btn {
+        min-height: 36px;
+        padding: 0 12px;
+        font-size: 0.82rem;
+    }
+
+    .user-chip {
+        max-width: 112px;
+        padding: 8px 10px;
+    }
+
+    .container,
+    .product-list {
+        min-height: 720px;
+    }
+
+    .product-item {
+        padding-top: 142px;
+        padding-bottom: 132px;
+    }
+
+    .product-img {
+        min-height: 210px;
+    }
+
+    .product-img img {
+        max-height: 220px;
     }
 
     .auth-panel {
@@ -905,5 +945,10 @@ input {
 
     .description {
         font-size: 0.92rem;
+    }
+
+    .contact-actions .btn,
+    .ghost-btn {
+        width: 100%;
     }
 }
