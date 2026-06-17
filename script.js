@@ -100,7 +100,11 @@ document.addEventListener("keydown", (event) => {
 });
 
 function getUsers() {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+    try {
+        return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+    } catch {
+        return [];
+    }
 }
 
 function saveUsers(users) {
@@ -108,7 +112,11 @@ function saveUsers(users) {
 }
 
 function getSession() {
-    return JSON.parse(localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY) || "null");
+    try {
+        return JSON.parse(localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY) || "null");
+    } catch {
+        return null;
+    }
 }
 
 function saveSession(user) {
@@ -129,6 +137,25 @@ function normalizeEmail(email) {
 
 function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function hashPassword(password) {
+    if (window.crypto?.subtle) {
+        const encodedPassword = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", encodedPassword);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+        return `sha256:${hashArray.map((byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+    }
+
+    let hash = 2166136261;
+
+    for (let index = 0; index < password.length; index++) {
+        hash ^= password.charCodeAt(index);
+        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    }
+
+    return `fnv:${(hash >>> 0).toString(16)}`;
 }
 
 function getPasswordScore(password) {
@@ -310,7 +337,7 @@ signupPassword.addEventListener("input", () => {
     passwordMeter.classList.toggle("strong", score >= 5);
 });
 
-signupForm.addEventListener("submit", (event) => {
+signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     if (!validateSignup()) return;
@@ -318,7 +345,7 @@ signupForm.addEventListener("submit", (event) => {
     const user = {
         name: document.querySelector("#signup-name").value.trim(),
         email: normalizeEmail(document.querySelector("#signup-email").value),
-        password: document.querySelector("#signup-password").value
+        passwordHash: await hashPassword(document.querySelector("#signup-password").value)
     };
     const users = getUsers();
 
@@ -333,7 +360,7 @@ signupForm.addEventListener("submit", (event) => {
     setTimeout(closeAuthModal, 700);
 });
 
-loginForm.addEventListener("submit", (event) => {
+loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     if (!validateLogin()) return;
@@ -341,11 +368,21 @@ loginForm.addEventListener("submit", (event) => {
     const email = normalizeEmail(document.querySelector("#login-email").value);
     const password = document.querySelector("#login-password").value;
     const remember = document.querySelector("#remember-login").checked;
-    const user = getUsers().find((account) => account.email === email && account.password === password);
+    const passwordHash = await hashPassword(password);
+    const users = getUsers();
+    const user = users.find((account) => {
+        return account.email === email && (account.passwordHash === passwordHash || account.password === password);
+    });
 
     if (!user) {
         setMessage(loginMessage, "E-mail ou senha incorretos.", "error");
         return;
+    }
+
+    if (!user.passwordHash) {
+        user.passwordHash = passwordHash;
+        delete user.password;
+        saveUsers(users);
     }
 
     if (remember) {

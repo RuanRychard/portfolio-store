@@ -16,13 +16,13 @@
 
 <body>
     <header class="site-header">
-        <a class="logo" href="#" aria-label="Portfolio Store">PORTFOLIO STORE</a>
+        <a class="logo" href="#home" aria-label="Portfolio Store">PORTFOLIO STORE</a>
 
         <nav class="site-nav" aria-label="Navegação principal">
             <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Produtos</a></li>
-                <li><a href="#">Contato</a></li>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#products">Produtos</a></li>
+                <li><a href="#contact">Contato</a></li>
             </ul>
         </nav>
 
@@ -33,7 +33,7 @@
         </div>
     </header>
 
-    <main class="container">
+    <main class="container" id="home">
         <div class="tech-circle" aria-hidden="true">
             <div class="circle"></div>
             <div class="circle"></div>
@@ -119,6 +119,58 @@
         </div>
     </main>
 
+    <section class="showcase-section" id="products">
+        <div class="section-inner">
+            <div class="section-heading">
+                <p class="product-tag">Experiência</p>
+                <h2>Uma vitrine tech completa para portfólio</h2>
+                <p>
+                    O projeto demonstra interface responsiva, carrossel automático, autenticação simulada e persistência
+                    local com JavaScript puro.
+                </p>
+            </div>
+
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <span>01</span>
+                    <h3>Carrossel inteligente</h3>
+                    <p>Transição automática, navegação manual, pausa em interação e suporte a teclado.</p>
+                </article>
+
+                <article class="feature-card">
+                    <span>02</span>
+                    <h3>Login simulado</h3>
+                    <p>Cadastro, validação, medidor de senha, sessão local e fluxo de recuperação demonstrativo.</p>
+                </article>
+
+                <article class="feature-card">
+                    <span>03</span>
+                    <h3>Layout responsivo</h3>
+                    <p>Interface adaptada para desktop e telas menores, com foco em leitura e navegação simples.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+        <div class="section-inner contact-inner">
+            <div>
+                <p class="product-tag">Contato</p>
+                <h2>Projeto em evolução</h2>
+                <p>
+                    Esta vitrine está sendo lapidada como peça de portfólio, com melhorias incrementais em design,
+                    acessibilidade e organização de código.
+                </p>
+            </div>
+
+            <div class="contact-actions">
+                <a class="btn" href="https://github.com/RuanRychard/portfolio-store" target="_blank"
+                    rel="noreferrer">Ver Repositório</a>
+                <a class="ghost-btn" href="mailto:ruanrychardcaetano@gmail.com">Enviar E-mail</a>
+            </div>
+        </div>
+    </section>
+
     <div class="auth-modal" id="auth-modal" aria-hidden="true">
         <div class="auth-backdrop" data-close-login></div>
 
@@ -131,6 +183,7 @@
                 <p class="product-tag">Área do Cliente</p>
                 <h2 id="auth-title">Acesse sua conta</h2>
                 <p>Salve seus produtos favoritos, acompanhe novidades e tenha uma experiência personalizada.</p>
+                <p class="auth-note">Autenticação simulada para fins de estudo e portfólio.</p>
             </div>
 
             <div class="auth-tabs" role="tablist" aria-label="Escolher formulário">
