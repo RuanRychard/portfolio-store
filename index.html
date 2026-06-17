@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+    <title>Portfolio Store</title>
+</head>
+
+<body>
+    <header class="site-header">
+        <a class="logo" href="#" aria-label="Portfolio Store">PORTFOLIO STORE</a>
+
+        <nav class="site-nav" aria-label="Navegação principal">
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Produtos</a></li>
+                <li><a href="#">Contato</a></li>
+            </ul>
+        </nav>
+
+        <div class="auth-actions">
+            <span class="user-chip" id="user-chip" hidden></span>
+            <button class="login-trigger" id="open-login" type="button">Entrar</button>
+            <button class="logout-btn" id="logout-btn" type="button" hidden>Sair</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="tech-circle" aria-hidden="true">
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+        </div>
+
+        <section class="product-list" aria-label="Produtos em destaque">
+            <article class="product-item active">
+                <div class="product-img">
+                    <img src="imagens/apple-watch.png" alt="Apple Watch Series 10">
+                </div>
+
+                <div class="content">
+                    <p class="product-tag">Novo Lançamento</p>
+                    <h1 class="product-name">Apple Watch Series 10</h1>
+                    <p class="description">
+                        Mais fino, mais elegante e mais poderoso do que nunca, o Apple Watch Series 10 chega para
+                        transformar a forma como você vive, treina e se conecta.
+                    </p>
+                    <button class="btn" type="button" data-open-login>Saiba Mais</button>
+                </div>
+            </article>
+
+            <article class="product-item">
+                <div class="product-img">
+                    <img src="imagens/air-pods.png" alt="AirPods Max">
+                </div>
+
+                <div class="content">
+                    <p class="product-tag">Som em Outro Nível</p>
+                    <h2 class="product-name">AirPods Max</h2>
+                    <p class="description">
+                        Descubra uma nova dimensão de som com os AirPods Max, o fone mais avançado da Apple, criado
+                        para quem exige qualidade, conforto e tecnologia de ponta.
+                    </p>
+                    <button class="btn" type="button" data-open-login>Saiba Mais</button>
+                </div>
+            </article>
+
+            <article class="product-item">
+                <div class="product-img">
+                    <img src="imagens/vision-pro.png" alt="Apple Vision Pro">
+                </div>
+
+                <div class="content">
+                    <p class="product-tag">O Futuro Chegou</p>
+                    <h2 class="product-name">Vision Pro</h2>
+                    <p class="description">
+                        Com ele, o mundo digital se mistura com o real, criando experiências totalmente imersivas. Você
+                        pode trabalhar, assistir, jogar e interagir como nunca antes, tudo no seu próprio espaço.
+                    </p>
+                    <button class="btn" type="button" data-open-login>Saiba Mais</button>
+                </div>
+            </article>
+        </section>
+
+        <div class="arrows" aria-label="Controles do carrossel">
+            <button class="arrow-btn" id="prev" type="button" aria-label="Produto anterior">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
+                    viewBox="0 0 16 16" aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        d="M12.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5M10 8a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 7.5H9.5a.5.5 0 0 1 .5.5" />
+                </svg>
+            </button>
+
+            <button class="arrow-btn" id="next" type="button" aria-label="Próximo produto">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
+                    viewBox="0 0 16 16" aria-hidden="true">
+                    <path fill-rule="evenodd"
+                        d="M6 8a.5.5 0 0 0 .5.5h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L12.293 7.5H6.5A.5.5 0 0 0 6 8m-2.5 7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="indicators" aria-label="Indicadores do carrossel">
+            <span class="numbers" aria-live="polite">01</span>
+            <div class="dots" role="tablist" aria-label="Selecionar produto">
+                <button class="dot active" type="button" aria-label="Mostrar Apple Watch Series 10"></button>
+                <button class="dot" type="button" aria-label="Mostrar AirPods Max"></button>
+                <button class="dot" type="button" aria-label="Mostrar Vision Pro"></button>
+            </div>
+        </div>
+    </main>
+
+    <div class="auth-modal" id="auth-modal" aria-hidden="true">
+        <div class="auth-backdrop" data-close-login></div>
+
+        <section class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+            <button class="close-auth" type="button" aria-label="Fechar login" data-close-login>
+                <span aria-hidden="true">×</span>
+            </button>
+
+            <div class="auth-copy">
+                <p class="product-tag">Área do Cliente</p>
+                <h2 id="auth-title">Acesse sua conta</h2>
+                <p>Salve seus produtos favoritos, acompanhe novidades e tenha uma experiência personalizada.</p>
+            </div>
+
+            <div class="auth-tabs" role="tablist" aria-label="Escolher formulário">
+                <button class="auth-tab active" type="button" data-auth-mode="login">Entrar</button>
+                <button class="auth-tab" type="button" data-auth-mode="signup">Criar conta</button>
+            </div>
+
+            <form class="auth-form active" id="login-form" novalidate>
+                <label class="field">
+                    <span>E-mail</span>
+                    <input type="email" id="login-email" autocomplete="email" placeholder="voce@email.com" required>
+                    <small></small>
+                </label>
+
+                <label class="field password-field">
+                    <span>Senha</span>
+                    <input type="password" id="login-password" autocomplete="current-password" placeholder="Sua senha"
+                        required>
+                    <button class="toggle-password" type="button" data-password-toggle="login-password"
+                        aria-label="Mostrar senha">Mostrar</button>
+                    <small></small>
+                </label>
+
+                <div class="form-row">
+                    <label class="remember">
+                        <input type="checkbox" id="remember-login">
+                        <span>Lembrar de mim</span>
+                    </label>
+                    <button class="link-btn" type="button" id="recover-password">Esqueci minha senha</button>
+                </div>
+
+                <p class="form-message" id="login-message" aria-live="polite"></p>
+                <button class="submit-auth" type="submit">Entrar na loja</button>
+            </form>
+
+            <form class="auth-form" id="signup-form" novalidate>
+                <label class="field">
+                    <span>Nome</span>
+                    <input type="text" id="signup-name" autocomplete="name" placeholder="Seu nome" required>
+                    <small></small>
+                </label>
+
+                <label class="field">
+                    <span>E-mail</span>
+                    <input type="email" id="signup-email" autocomplete="email" placeholder="voce@email.com" required>
+                    <small></small>
+                </label>
+
+                <label class="field password-field">
+                    <span>Senha</span>
+                    <input type="password" id="signup-password" autocomplete="new-password"
+                        placeholder="Mínimo 8 caracteres" required>
+                    <button class="toggle-password" type="button" data-password-toggle="signup-password"
+                        aria-label="Mostrar senha">Mostrar</button>
+                    <small></small>
+                </label>
+
+                <div class="password-meter" aria-hidden="true">
+                    <span></span>
+                </div>
+                <p class="password-hint">Use letras maiúsculas, minúsculas, número e símbolo.</p>
+
+                <label class="field password-field">
+                    <span>Confirmar senha</span>
+                    <input type="password" id="signup-confirm" autocomplete="new-password"
+                        placeholder="Repita sua senha" required>
+                    <button class="toggle-password" type="button" data-password-toggle="signup-confirm"
+                        aria-label="Mostrar senha">Mostrar</button>
+                    <small></small>
+                </label>
+
+                <label class="remember terms">
+                    <input type="checkbox" id="signup-terms">
+                    <span>Aceito receber novidades e ofertas da Portfolio Store.</span>
+                </label>
+
+                <p class="form-message" id="signup-message" aria-live="polite"></p>
+                <button class="submit-auth" type="submit">Criar minha conta</button>
+            </form>
+        </section>
+    </div>
+</body>
+
+</html>
