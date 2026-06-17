@@ -1,3 +1,45 @@
+const products = [
+    {
+        name: "Apple Watch Series 10",
+        tag: "Novo Lançamento",
+        image: "imagens/apple-watch.png",
+        imageAlt: "Apple Watch Series 10",
+        description:
+            "Mais fino, mais elegante e mais poderoso do que nunca, o Apple Watch Series 10 chega para transformar a forma como você vive, treina e se conecta.",
+        specs: [
+            ["Tela", "OLED ampla e brilhante"],
+            ["Destaque", "Monitoramento de saúde e treino"],
+            ["Experiência", "Integração com notificações, apps e chamadas"]
+        ]
+    },
+    {
+        name: "AirPods Max",
+        tag: "Som em Outro Nível",
+        image: "imagens/air-pods.png",
+        imageAlt: "AirPods Max",
+        description:
+            "Descubra uma nova dimensão de som com os AirPods Max, o fone mais avançado da Apple, criado para quem exige qualidade, conforto e tecnologia de ponta.",
+        specs: [
+            ["Áudio", "Som espacial e cancelamento ativo"],
+            ["Conforto", "Estrutura premium para longas sessões"],
+            ["Experiência", "Imersão para música, filmes e chamadas"]
+        ]
+    },
+    {
+        name: "Vision Pro",
+        tag: "O Futuro Chegou",
+        image: "imagens/vision-pro.png",
+        imageAlt: "Apple Vision Pro",
+        description:
+            "Com ele, o mundo digital se mistura com o real, criando experiências totalmente imersivas. Você pode trabalhar, assistir, jogar e interagir como nunca antes.",
+        specs: [
+            ["Interface", "Computação espacial"],
+            ["Uso", "Trabalho, entretenimento e colaboração"],
+            ["Experiência", "Conteúdos digitais integrados ao ambiente real"]
+        ]
+    }
+];
+
 const items = document.querySelectorAll(".product-item");
 const dots = document.querySelectorAll(".dot");
 const number = document.querySelector(".numbers");
@@ -5,8 +47,19 @@ const nextButton = document.querySelector("#next");
 const prevButton = document.querySelector("#prev");
 const productList = document.querySelector(".product-list");
 
+const productModal = document.querySelector("#product-modal");
+const productDetailButtons = document.querySelectorAll("[data-product-details]");
+const closeProductButtons = document.querySelectorAll("[data-close-product]");
+const detailImage = document.querySelector("#detail-image");
+const detailTag = document.querySelector("#detail-tag");
+const detailTitle = document.querySelector("#detail-title");
+const detailDescription = document.querySelector("#detail-description");
+const detailSpecs = document.querySelector("#detail-specs");
+const detailMessage = document.querySelector("#detail-message");
+const favoriteProductButton = document.querySelector("#favorite-product");
+
 const authModal = document.querySelector("#auth-modal");
-const openLoginButtons = document.querySelectorAll("#open-login, [data-open-login]");
+const openLoginButtons = document.querySelectorAll("#open-login");
 const closeLoginButtons = document.querySelectorAll("[data-close-login]");
 const authTabs = document.querySelectorAll(".auth-tab");
 const authForms = document.querySelectorAll(".auth-form");
@@ -23,11 +76,14 @@ const passwordMeter = document.querySelector(".password-meter");
 
 const USERS_KEY = "portfolioStoreUsers";
 const SESSION_KEY = "portfolioStoreSession";
+const FAVORITES_KEY = "portfolioStoreFavorites";
 const AUTO_PLAY_TIME = 4500;
 
 let currentIndex = 0;
+let selectedProductIndex = 0;
 let autoPlayId;
 let resumeAutoPlayId;
+let lastFocusedElement;
 
 function showProduct(index) {
     const previousIndex = currentIndex;
@@ -67,38 +123,6 @@ function moveProduct(step) {
     pauseAutoPlayTemporarily();
 }
 
-nextButton.addEventListener("click", () => {
-    moveProduct(1);
-});
-
-prevButton.addEventListener("click", () => {
-    moveProduct(-1);
-});
-
-dots.forEach((dot, index) => {
-    dot.addEventListener("click", () => {
-        showProduct(index);
-        pauseAutoPlayTemporarily();
-    });
-});
-
-productList.addEventListener("mouseenter", stopAutoPlay);
-productList.addEventListener("mouseleave", startAutoPlay);
-
-document.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowRight") {
-        moveProduct(1);
-    }
-
-    if (event.key === "ArrowLeft") {
-        moveProduct(-1);
-    }
-
-    if (event.key === "Escape" && authModal.classList.contains("open")) {
-        closeAuthModal();
-    }
-});
-
 function getUsers() {
     try {
         return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
@@ -129,6 +153,18 @@ function saveSession(user) {
 
 function clearSession() {
     localStorage.removeItem(SESSION_KEY);
+}
+
+function getFavorites() {
+    try {
+        return JSON.parse(localStorage.getItem(FAVORITES_KEY) || "{}");
+    } catch {
+        return {};
+    }
+}
+
+function saveFavorites(favorites) {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
 }
 
 function normalizeEmail(email) {
@@ -190,9 +226,85 @@ function setMessage(element, text, type = "success") {
     element.classList.toggle("error", type === "error");
 }
 
+function setModalState(modal, isOpen) {
+    modal.classList.toggle("open", isOpen);
+    modal.setAttribute("aria-hidden", String(!isOpen));
+    document.body.classList.toggle("modal-open", document.querySelectorAll(".auth-modal.open, .product-modal.open").length > 0);
+}
+
+function updateFavoriteButton() {
+    const session = getSession();
+
+    if (!session) {
+        favoriteProductButton.textContent = "Entrar para favoritar";
+        return;
+    }
+
+    const favorites = getFavorites();
+    const userFavorites = favorites[session.email] || [];
+    const productName = products[selectedProductIndex].name;
+
+    favoriteProductButton.textContent = userFavorites.includes(productName)
+        ? "Remover dos favoritos"
+        : "Adicionar aos favoritos";
+}
+
+function openProductModal(index) {
+    const product = products[index];
+
+    selectedProductIndex = index;
+    lastFocusedElement = document.activeElement;
+    detailImage.src = product.image;
+    detailImage.alt = product.imageAlt;
+    detailTag.textContent = product.tag;
+    detailTitle.textContent = product.name;
+    detailDescription.textContent = product.description;
+    detailSpecs.innerHTML = product.specs
+        .map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`)
+        .join("");
+    setMessage(detailMessage, "");
+    updateFavoriteButton();
+    setModalState(productModal, true);
+    stopAutoPlay();
+    favoriteProductButton.focus();
+}
+
+function closeProductModal() {
+    setModalState(productModal, false);
+    startAutoPlay();
+    lastFocusedElement?.focus();
+}
+
+function toggleFavoriteProduct() {
+    const session = getSession();
+
+    if (!session) {
+        setMessage(detailMessage, "Faça login para salvar favoritos.", "error");
+        closeProductModal();
+        openAuthModal("login");
+        return;
+    }
+
+    const favorites = getFavorites();
+    const productName = products[selectedProductIndex].name;
+    const userFavorites = favorites[session.email] || [];
+    const isFavorite = userFavorites.includes(productName);
+
+    favorites[session.email] = isFavorite
+        ? userFavorites.filter((favorite) => favorite !== productName)
+        : [...userFavorites, productName];
+
+    saveFavorites(favorites);
+    updateFavoriteButton();
+    setMessage(detailMessage, isFavorite ? "Produto removido dos favoritos." : "Produto salvo nos favoritos.");
+}
+
 function switchAuthMode(mode) {
     authTabs.forEach((tab) => {
-        tab.classList.toggle("active", tab.dataset.authMode === mode);
+        const isActive = tab.dataset.authMode === mode;
+
+        tab.classList.toggle("active", isActive);
+        tab.setAttribute("aria-selected", String(isActive));
     });
 
     authForms.forEach((form) => {
@@ -204,10 +316,9 @@ function switchAuthMode(mode) {
 }
 
 function openAuthModal(mode = "login") {
+    lastFocusedElement = document.activeElement;
     switchAuthMode(mode);
-    authModal.classList.add("open");
-    authModal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-open");
+    setModalState(authModal, true);
     pauseAutoPlayTemporarily();
 
     const activeInput = authModal.querySelector(".auth-form.active input");
@@ -215,10 +326,9 @@ function openAuthModal(mode = "login") {
 }
 
 function closeAuthModal() {
-    authModal.classList.remove("open");
-    authModal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-open");
+    setModalState(authModal, false);
     startAutoPlay();
+    lastFocusedElement?.focus();
 }
 
 function updateAuthUi() {
@@ -235,6 +345,7 @@ function updateAuthUi() {
     userChip.hidden = false;
     loginTrigger.hidden = true;
     logoutButton.hidden = false;
+    updateFavoriteButton();
 }
 
 function validateLogin() {
@@ -303,6 +414,52 @@ function validateSignup() {
 
     return valid;
 }
+
+nextButton.addEventListener("click", () => {
+    moveProduct(1);
+});
+
+prevButton.addEventListener("click", () => {
+    moveProduct(-1);
+});
+
+dots.forEach((dot, index) => {
+    dot.addEventListener("click", () => {
+        showProduct(index);
+        pauseAutoPlayTemporarily();
+    });
+});
+
+productDetailButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        openProductModal(Number(button.dataset.productDetails));
+    });
+});
+
+closeProductButtons.forEach((button) => {
+    button.addEventListener("click", closeProductModal);
+});
+
+favoriteProductButton.addEventListener("click", toggleFavoriteProduct);
+
+productList.addEventListener("mouseenter", stopAutoPlay);
+productList.addEventListener("mouseleave", startAutoPlay);
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowRight" && !document.body.classList.contains("modal-open")) {
+        moveProduct(1);
+    }
+
+    if (event.key === "ArrowLeft" && !document.body.classList.contains("modal-open")) {
+        moveProduct(-1);
+    }
+
+    if (event.key === "Escape" && productModal.classList.contains("open")) {
+        closeProductModal();
+    } else if (event.key === "Escape" && authModal.classList.contains("open")) {
+        closeAuthModal();
+    }
+});
 
 openLoginButtons.forEach((button) => {
     button.addEventListener("click", () => openAuthModal("login"));
@@ -420,6 +577,11 @@ recoverPassword.addEventListener("click", () => {
 });
 
 window.addEventListener("storage", updateAuthUi);
+
+authTabs.forEach((tab) => {
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-selected", String(tab.classList.contains("active")));
+});
 
 updateAuthUi();
 startAutoPlay();

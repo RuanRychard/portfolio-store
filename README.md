@@ -2,6 +2,8 @@
 
 Vitrine interativa de produtos tech feita com HTML, CSS e JavaScript puro.
 
+![Preview do Portfolio Store](imagens/preview.svg)
+
 ## Preview
 
 - Projeto online: [portfolio-store](https://ruanrychard.github.io/portfolio-store/)
@@ -11,12 +13,15 @@ Vitrine interativa de produtos tech feita com HTML, CSS e JavaScript puro.
 
 - Carrossel automático de produtos
 - Navegação por setas, dots e teclado
+- Modal com detalhes de cada produto
 - Modal de login e cadastro
 - Validação de formulário
 - Medidor de força de senha
 - Simulação de autenticação com persistência local
+- Favoritos por usuário usando armazenamento local
 - Hash de senha para evitar armazenamento em texto puro na simulação
 - Seções com navegação por âncoras
+- SEO básico, Open Graph e favicon SVG
 - Layout responsivo
 
 ## Tecnologias
@@ -33,5 +38,5 @@ O login é uma simulação front-end para fins de estudo e portfólio. Ele não 
 ## Próximas melhorias
 
 - Refinar acessibilidade do modal
-- Adicionar página ou seção de detalhes dos produtos
-- Melhorar a documentação com screenshot do projeto publicado
+- Adicionar listagem visual dos favoritos do usuário
+- Melhorar a documentação com screenshot real do projeto publicado
