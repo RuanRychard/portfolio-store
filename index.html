@@ -226,11 +226,21 @@
             </div>
 
             <div class="auth-tabs" role="tablist" aria-label="Escolher formulário">
-                <button class="auth-tab active" type="button" data-auth-mode="login">Entrar</button>
-                <button class="auth-tab" type="button" data-auth-mode="signup">Criar conta</button>
+                <button class="auth-tab active" id="login-tab" type="button" data-auth-mode="login"
+                    aria-controls="login-form">Entrar</button>
+                <button class="auth-tab" id="signup-tab" type="button" data-auth-mode="signup"
+                    aria-controls="signup-form">Criar conta</button>
             </div>
 
-            <form class="auth-form active" id="login-form" novalidate>
+            <form class="auth-form active" id="login-form" role="tabpanel" aria-labelledby="login-tab" novalidate>
+                <div class="demo-access">
+                    <div>
+                        <strong>Conta de demonstração</strong>
+                        <span>demo@portfolio.store · Portfolio@2026</span>
+                    </div>
+                    <button class="link-btn" type="button" id="fill-demo-login">Usar conta demo</button>
+                </div>
+
                 <label class="field">
                     <span>E-mail</span>
                     <input type="email" id="login-email" autocomplete="email" placeholder="voce@email.com" required>
@@ -255,10 +265,10 @@
                 </div>
 
                 <p class="form-message" id="login-message" aria-live="polite"></p>
-                <button class="submit-auth" type="submit">Entrar na loja</button>
+                <button class="submit-auth" type="submit" data-loading-text="Entrando...">Entrar na loja</button>
             </form>
 
-            <form class="auth-form" id="signup-form" novalidate>
+            <form class="auth-form" id="signup-form" role="tabpanel" aria-labelledby="signup-tab" novalidate>
                 <label class="field">
                     <span>Nome</span>
                     <input type="text" id="signup-name" autocomplete="name" placeholder="Seu nome" required>
@@ -296,11 +306,29 @@
 
                 <label class="remember terms">
                     <input type="checkbox" id="signup-terms">
-                    <span>Aceito receber novidades e ofertas da Portfolio Store.</span>
+                    <span>Quero receber novidades e ofertas da Portfolio Store (opcional).</span>
                 </label>
 
                 <p class="form-message" id="signup-message" aria-live="polite"></p>
-                <button class="submit-auth" type="submit">Criar minha conta</button>
+                <button class="submit-auth" type="submit" data-loading-text="Criando conta...">Criar minha conta</button>
+            </form>
+
+            <form class="auth-form" id="recovery-form" novalidate>
+                <div class="recovery-heading">
+                    <p class="product-tag">Recuperar acesso</p>
+                    <h3>Redefina sua senha</h3>
+                    <p>Informe o e-mail cadastrado para simular o envio das instruções.</p>
+                </div>
+
+                <label class="field">
+                    <span>E-mail</span>
+                    <input type="email" id="recovery-email" autocomplete="email" placeholder="voce@email.com" required>
+                    <small></small>
+                </label>
+
+                <p class="form-message" id="recovery-message" aria-live="polite"></p>
+                <button class="submit-auth" type="submit" data-loading-text="Enviando...">Enviar instruções</button>
+                <button class="link-btn back-to-login" type="button" id="back-to-login">Voltar para entrar</button>
             </form>
         </section>
     </div>

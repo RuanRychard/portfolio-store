@@ -15,8 +15,12 @@ Vitrine interativa de produtos tech feita com HTML, CSS e JavaScript puro.
 - Navegação por setas, dots e teclado
 - Modal com detalhes de cada produto
 - Modal de login e cadastro
+- Conta de demonstração para avaliação rápida
+- Recuperação de senha simulada
 - Validação de formulário
 - Medidor de força de senha
+- Sessão temporária ou lembrada, com expiração automática
+- Navegação acessível por teclado e controle de foco nos modais
 - Simulação de autenticação com persistência local
 - Favoritos por usuário usando armazenamento local
 - Hash de senha para evitar armazenamento em texto puro na simulação
@@ -35,8 +39,12 @@ Vitrine interativa de produtos tech feita com HTML, CSS e JavaScript puro.
 
 O login é uma simulação front-end para fins de estudo e portfólio. Ele não deve ser usado como autenticação real em produção.
 
+### Conta de demonstração
+
+- E-mail: `demo@portfolio.store`
+- Senha: `Portfolio@2026`
+
 ## Próximas melhorias
 
-- Refinar acessibilidade do modal
 - Adicionar listagem visual dos favoritos do usuário
 - Melhorar a documentação com screenshot real do projeto publicado

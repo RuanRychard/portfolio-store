@@ -63,14 +63,20 @@ const openLoginButtons = document.querySelectorAll("#open-login");
 const closeLoginButtons = document.querySelectorAll("[data-close-login]");
 const authTabs = document.querySelectorAll(".auth-tab");
 const authForms = document.querySelectorAll(".auth-form");
+const authTabsContainer = document.querySelector(".auth-tabs");
+const authTitle = document.querySelector("#auth-title");
 const loginForm = document.querySelector("#login-form");
 const signupForm = document.querySelector("#signup-form");
+const recoveryForm = document.querySelector("#recovery-form");
 const loginMessage = document.querySelector("#login-message");
 const signupMessage = document.querySelector("#signup-message");
+const recoveryMessage = document.querySelector("#recovery-message");
 const userChip = document.querySelector("#user-chip");
 const loginTrigger = document.querySelector("#open-login");
 const logoutButton = document.querySelector("#logout-btn");
 const recoverPassword = document.querySelector("#recover-password");
+const backToLogin = document.querySelector("#back-to-login");
+const fillDemoLogin = document.querySelector("#fill-demo-login");
 const signupPassword = document.querySelector("#signup-password");
 const passwordMeter = document.querySelector(".password-meter");
 
@@ -78,12 +84,20 @@ const USERS_KEY = "portfolioStoreUsers";
 const SESSION_KEY = "portfolioStoreSession";
 const FAVORITES_KEY = "portfolioStoreFavorites";
 const AUTO_PLAY_TIME = 4500;
+const REMEMBERED_SESSION_TIME = 7 * 24 * 60 * 60 * 1000;
+const TEMPORARY_SESSION_TIME = 8 * 60 * 60 * 1000;
+const DEMO_USER = {
+    name: "Visitante Demo",
+    email: "demo@portfolio.store",
+    password: "Portfolio@2026"
+};
 
 let currentIndex = 0;
 let selectedProductIndex = 0;
 let autoPlayId;
 let resumeAutoPlayId;
 let lastFocusedElement;
+let sessionExpired = false;
 
 function showProduct(index) {
     const previousIndex = currentIndex;
@@ -137,22 +151,41 @@ function saveUsers(users) {
 
 function getSession() {
     try {
-        return JSON.parse(localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY) || "null");
+        const storedSession = localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY);
+
+        if (!storedSession) return null;
+
+        const session = JSON.parse(storedSession);
+
+        if (!session.expiresAt || Date.now() >= session.expiresAt) {
+            clearSession();
+            sessionExpired = true;
+            return null;
+        }
+
+        return session;
     } catch {
+        clearSession();
         return null;
     }
 }
 
-function saveSession(user) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify({
+function saveSession(user, remember = false) {
+    const storage = remember ? localStorage : sessionStorage;
+    const duration = remember ? REMEMBERED_SESSION_TIME : TEMPORARY_SESSION_TIME;
+
+    clearSession();
+    storage.setItem(SESSION_KEY, JSON.stringify({
         name: user.name,
         email: user.email,
-        loggedAt: new Date().toISOString()
+        loggedAt: new Date().toISOString(),
+        expiresAt: Date.now() + duration
     }));
 }
 
 function clearSession() {
     localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
 }
 
 function getFavorites() {
@@ -211,12 +244,14 @@ function setFieldError(input, message = "") {
     const small = field.querySelector("small");
 
     field.classList.toggle("error", Boolean(message));
+    input.setAttribute("aria-invalid", String(Boolean(message)));
     small.textContent = message;
 }
 
 function clearFormErrors(form) {
     form.querySelectorAll(".field").forEach((field) => {
         field.classList.remove("error");
+        field.querySelector("input").setAttribute("aria-invalid", "false");
         field.querySelector("small").textContent = "";
     });
 }
@@ -224,6 +259,43 @@ function clearFormErrors(form) {
 function setMessage(element, text, type = "success") {
     element.textContent = text;
     element.classList.toggle("error", type === "error");
+}
+
+function setSubmitLoading(form, isLoading) {
+    const button = form.querySelector(".submit-auth");
+
+    if (!button.dataset.defaultText) {
+        button.dataset.defaultText = button.textContent;
+    }
+
+    button.disabled = isLoading;
+    button.classList.toggle("is-loading", isLoading);
+    button.textContent = isLoading ? button.dataset.loadingText : button.dataset.defaultText;
+}
+
+function wait(milliseconds) {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+function keepFocusInside(modal, event) {
+    if (event.key !== "Tab") return;
+
+    const focusableElements = [...modal.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+    )].filter((element) => element.offsetParent !== null);
+
+    if (!focusableElements.length) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+    } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+    }
 }
 
 function setModalState(modal, isOpen) {
@@ -300,19 +372,28 @@ function toggleFavoriteProduct() {
 }
 
 function switchAuthMode(mode) {
+    const isRecovery = mode === "recovery";
+
     authTabs.forEach((tab) => {
         const isActive = tab.dataset.authMode === mode;
 
         tab.classList.toggle("active", isActive);
         tab.setAttribute("aria-selected", String(isActive));
+        tab.tabIndex = isActive || isRecovery ? 0 : -1;
     });
 
     authForms.forEach((form) => {
-        form.classList.toggle("active", form.id === `${mode}-form`);
+        const isActive = form.id === `${mode}-form`;
+
+        form.classList.toggle("active", isActive);
+        form.hidden = !isActive;
     });
 
+    authTabsContainer.hidden = isRecovery;
+    authTitle.textContent = isRecovery ? "Recupere seu acesso" : "Acesse sua conta";
     setMessage(loginMessage, "");
     setMessage(signupMessage, "");
+    setMessage(recoveryMessage, "");
 }
 
 function openAuthModal(mode = "login") {
@@ -323,6 +404,11 @@ function openAuthModal(mode = "login") {
 
     const activeInput = authModal.querySelector(".auth-form.active input");
     activeInput.focus();
+
+    if (sessionExpired) {
+        setMessage(loginMessage, "Sua sessão expirou. Entre novamente para continuar.", "error");
+        sessionExpired = false;
+    }
 }
 
 function closeAuthModal() {
@@ -376,7 +462,6 @@ function validateSignup() {
     const emailInput = document.querySelector("#signup-email");
     const passwordInput = document.querySelector("#signup-password");
     const confirmInput = document.querySelector("#signup-confirm");
-    const termsInput = document.querySelector("#signup-terms");
     const users = getUsers();
     const email = normalizeEmail(emailInput.value);
     let valid = true;
@@ -392,7 +477,7 @@ function validateSignup() {
     if (!isValidEmail(email)) {
         setFieldError(emailInput, "Digite um e-mail válido.");
         valid = false;
-    } else if (users.some((user) => user.email === email)) {
+    } else if (email === DEMO_USER.email || users.some((user) => user.email === email)) {
         setFieldError(emailInput, "Este e-mail já tem uma conta.");
         valid = false;
     }
@@ -404,11 +489,6 @@ function validateSignup() {
 
     if (confirmInput.value !== passwordInput.value) {
         setFieldError(confirmInput, "As senhas não conferem.");
-        valid = false;
-    }
-
-    if (!termsInput.checked) {
-        setMessage(signupMessage, "Aceite as novidades para continuar.", "error");
         valid = false;
     }
 
@@ -446,6 +526,12 @@ productList.addEventListener("mouseenter", stopAutoPlay);
 productList.addEventListener("mouseleave", startAutoPlay);
 
 document.addEventListener("keydown", (event) => {
+    if (authModal.classList.contains("open")) {
+        keepFocusInside(authModal, event);
+    } else if (productModal.classList.contains("open")) {
+        keepFocusInside(productModal, event);
+    }
+
     if (event.key === "ArrowRight" && !document.body.classList.contains("modal-open")) {
         moveProduct(1);
     }
@@ -471,6 +557,35 @@ closeLoginButtons.forEach((button) => {
 
 authTabs.forEach((tab) => {
     tab.addEventListener("click", () => switchAuthMode(tab.dataset.authMode));
+    tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+
+        event.preventDefault();
+        const tabs = [...authTabs];
+        const currentTabIndex = tabs.indexOf(tab);
+        let nextTabIndex = currentTabIndex;
+
+        if (event.key === "ArrowRight") nextTabIndex = (currentTabIndex + 1) % tabs.length;
+        if (event.key === "ArrowLeft") nextTabIndex = (currentTabIndex - 1 + tabs.length) % tabs.length;
+        if (event.key === "Home") nextTabIndex = 0;
+        if (event.key === "End") nextTabIndex = tabs.length - 1;
+
+        switchAuthMode(tabs[nextTabIndex].dataset.authMode);
+        tabs[nextTabIndex].focus();
+    });
+});
+
+fillDemoLogin.addEventListener("click", () => {
+    document.querySelector("#login-email").value = DEMO_USER.email;
+    document.querySelector("#login-password").value = DEMO_USER.password;
+    clearFormErrors(loginForm);
+    setMessage(loginMessage, "Dados de demonstração preenchidos.");
+    document.querySelector("#login-password").focus();
+});
+
+backToLogin.addEventListener("click", () => {
+    switchAuthMode("login");
+    document.querySelector("#login-email").focus();
 });
 
 document.querySelectorAll(".toggle-password").forEach((button) => {
@@ -499,6 +614,8 @@ signupForm.addEventListener("submit", async (event) => {
 
     if (!validateSignup()) return;
 
+    setSubmitLoading(signupForm, true);
+
     const user = {
         name: document.querySelector("#signup-name").value.trim(),
         email: normalizeEmail(document.querySelector("#signup-email").value),
@@ -506,12 +623,15 @@ signupForm.addEventListener("submit", async (event) => {
     };
     const users = getUsers();
 
+    await wait(350);
     users.push(user);
     saveUsers(users);
     saveSession(user);
     updateAuthUi();
     signupForm.reset();
     passwordMeter.querySelector("span").style.width = "0";
+    passwordMeter.classList.remove("medium", "strong");
+    setSubmitLoading(signupForm, false);
     setMessage(signupMessage, "Conta criada com sucesso.");
 
     setTimeout(closeAuthModal, 700);
@@ -525,35 +645,36 @@ loginForm.addEventListener("submit", async (event) => {
     const email = normalizeEmail(document.querySelector("#login-email").value);
     const password = document.querySelector("#login-password").value;
     const remember = document.querySelector("#remember-login").checked;
+
+    setSubmitLoading(loginForm, true);
+
     const passwordHash = await hashPassword(password);
     const users = getUsers();
-    const user = users.find((account) => {
+    const savedUser = users.find((account) => {
         return account.email === email && (account.passwordHash === passwordHash || account.password === password);
     });
+    const isDemoLogin = email === DEMO_USER.email && password === DEMO_USER.password;
+    const user = isDemoLogin ? DEMO_USER : savedUser;
 
     if (!user) {
+        await wait(350);
+        setSubmitLoading(loginForm, false);
         setMessage(loginMessage, "E-mail ou senha incorretos.", "error");
+        document.querySelector("#login-password").focus();
         return;
     }
 
-    if (!user.passwordHash) {
+    if (savedUser && !savedUser.passwordHash) {
         user.passwordHash = passwordHash;
         delete user.password;
         saveUsers(users);
     }
 
-    if (remember) {
-        saveSession(user);
-    } else {
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify({
-            name: user.name,
-            email: user.email,
-            loggedAt: new Date().toISOString()
-        }));
-    }
-
+    await wait(350);
+    saveSession(user, remember);
     updateAuthUi();
     loginForm.reset();
+    setSubmitLoading(loginForm, false);
     setMessage(loginMessage, "Login realizado com sucesso.");
 
     setTimeout(closeAuthModal, 700);
@@ -561,19 +682,36 @@ loginForm.addEventListener("submit", async (event) => {
 
 logoutButton.addEventListener("click", () => {
     clearSession();
-    sessionStorage.removeItem(SESSION_KEY);
     updateAuthUi();
 });
 
 recoverPassword.addEventListener("click", () => {
-    const email = normalizeEmail(document.querySelector("#login-email").value);
+    const loginEmail = document.querySelector("#login-email").value;
+
+    switchAuthMode("recovery");
+    document.querySelector("#recovery-email").value = loginEmail;
+    document.querySelector("#recovery-email").focus();
+});
+
+recoveryForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const emailInput = document.querySelector("#recovery-email");
+    const email = normalizeEmail(emailInput.value);
+
+    clearFormErrors(recoveryForm);
+    setMessage(recoveryMessage, "");
 
     if (!isValidEmail(email)) {
-        setMessage(loginMessage, "Digite seu e-mail para simular a recuperação.", "error");
+        setFieldError(emailInput, "Digite um e-mail válido.");
+        emailInput.focus();
         return;
     }
 
-    setMessage(loginMessage, "Enviamos instruções de recuperação para seu e-mail.");
+    setSubmitLoading(recoveryForm, true);
+    await wait(650);
+    setSubmitLoading(recoveryForm, false);
+    setMessage(recoveryMessage, "Instruções simuladas enviadas. Verifique sua caixa de entrada.");
 });
 
 window.addEventListener("storage", updateAuthUi);
@@ -583,5 +721,6 @@ authTabs.forEach((tab) => {
     tab.setAttribute("aria-selected", String(tab.classList.contains("active")));
 });
 
+switchAuthMode("login");
 updateAuthUi();
 startAutoPlay();

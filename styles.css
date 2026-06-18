@@ -736,6 +736,33 @@ input {
     gap: 14px;
 }
 
+.demo-access {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px;
+    border: 1px solid rgba(0, 247, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(0, 247, 255, 0.06);
+}
+
+.demo-access div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.demo-access strong {
+    font-size: 0.82rem;
+}
+
+.demo-access span {
+    overflow-wrap: anywhere;
+    color: var(--muted);
+    font-size: 0.74rem;
+}
+
 .field {
     display: grid;
     gap: 7px;
@@ -858,6 +885,27 @@ input {
     align-items: flex-start;
 }
 
+.recovery-heading {
+    display: grid;
+    gap: 7px;
+}
+
+.recovery-heading h3 {
+    font-family: "Orbitron", sans-serif;
+    font-size: 1.25rem;
+}
+
+.recovery-heading > p:last-child {
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.back-to-login {
+    min-height: 36px;
+    justify-self: center;
+}
+
 .form-message {
     min-height: 20px;
     color: var(--cyan);
@@ -884,6 +932,39 @@ input {
 .submit-auth:focus-visible {
     transform: translateY(-2px);
     box-shadow: 0 18px 38px rgba(0, 247, 255, 0.32);
+}
+
+.submit-auth:disabled {
+    cursor: wait;
+    opacity: 0.72;
+    transform: none;
+    box-shadow: none;
+}
+
+.submit-auth.is-loading::after {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-left: 9px;
+    border: 2px solid rgba(6, 16, 23, 0.28);
+    border-top-color: #061017;
+    border-radius: 50%;
+    vertical-align: -2px;
+    animation: auth-spin 0.7s linear infinite;
+}
+
+@keyframes auth-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 520px) {
+    .demo-access {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 760px) {
